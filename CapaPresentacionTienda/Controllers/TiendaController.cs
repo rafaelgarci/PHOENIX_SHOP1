@@ -88,8 +88,127 @@ namespace CapaPresentacionTienda.Controllers
 
 
         }
+        [HttpPost]
+        public JsonResult AgregarCarrito(int idproducto)
+        {
+            int idcliente = ((Cliente)Session["Cliente"]).IdCliente;
+
+            bool existe = new CN_Carrito().ExisteCarrito(idcliente, idproducto);
+
+            bool respuesta = false;
+             string mensaje = string.Empty;
+
+            if (existe)
+            {
+                mensaje = " el producto ya existe en el carrito ";
+            }
+            else
+            {
+                respuesta= new CN_Carrito().OperacionCarrito(idcliente,idproducto,true ,out mensaje);
+            }
+
+            return Json(new { respuesta = respuesta, mensaje = mensaje}, JsonRequestBehavior.AllowGet);
+        }
+        [HttpGet]
+
+        public JsonResult CantidadEnCarrito()
+        {
+            int idcliente = ((Cliente)Session["cliente"]).IdCliente;
+            int cantidad = new CN_Carrito().CantidadEnCarrito(idcliente); 
+            return Json(new { cantidad = cantidad } , JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult ListarProductosCarrito() {
+
+            int idcliente = ((Cliente)Session["cliente"]).IdCliente;
+
+            List<Carrito> olista = new List<Carrito>();
+
+            bool conversion;
+
+            olista = new CN_Carrito().ListarProducto(idcliente).Select(oc => new Carrito()
+            {
+                oProducto = new Producto()
+                {
+                    IdProducto = oc.oProducto.IdProducto,
+                    Nombre = oc.oProducto.Nombre,
+                    oMarca = oc.oProducto.oMarca,
+                    Precio = oc.oProducto.Precio,
+                    RutaImagen = oc.oProducto.RutaImagen,
+                    Base64 = CN_Recursos.ConvertirBase64(Path.Combine(oc.oProducto.RutaImagen, oc.oProducto.NombreImagen),out conversion),
+                    Extension = Path.GetExtension(oc.oProducto.NombreImagen)
+
+                },
+                Cantidad = oc.Cantidad 
+
+
+            }).ToList();
+
+            return Json(new { data = olista }, JsonRequestBehavior.AllowGet);
 
 
 
+        }
+        [HttpPost]
+        public JsonResult OPeracionCarrito(int idproducto, bool sumar)
+        {
+            int idcliente = ((Cliente)Session["Cliente"]).IdCliente;
+
+           
+            bool respuesta = false;
+            string mensaje = string.Empty;
+
+            respuesta = new CN_Carrito().OperacionCarrito(idcliente, idproducto, true, out mensaje);
+            
+
+            return Json(new { respuesta = respuesta, mensaje = mensaje }, JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+
+        public JsonResult EliminarCarrito (int idproducto)
+        {
+            int idcliente = ((Cliente)Session["Cliente"]).IdCliente;
+            bool respuesta = false;
+            string mensaje = string.Empty;
+            respuesta = new CN_Carrito().EliminarCarrito(idcliente, idproducto);
+
+            return Json(new {respuesta = respuesta,mensaje = mensaje}, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult ObtenerDepartamento()
+        {
+            List<Departamento> olista = new List<Departamento>();
+            olista = new CN_Ubicacion().ObtenerDepartamento();
+
+            return Json(new { lista = olista }, JsonRequestBehavior.AllowGet);
+        }
+
+
+        [HttpPost]
+        public JsonResult ObtenerProvincia( string IdDepartamento)
+        {
+            List<Provincia> olista = new List<Provincia>();
+            olista = new CN_Ubicacion().ObtenerProvincia(IdDepartamento);
+
+            return Json(new { lista = olista }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult ObtenerDistrito(string IdDepartamento, string IdProvincia)
+        {
+            List<Distrito> olista = new List<Distrito>();
+            olista = new CN_Ubicacion().ObtenerDistrito(IdDepartamento, IdProvincia);
+
+            return Json(new { lista = olista }, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Carrito()
+        {
+            
+            return View();
+
+        }
     }
 }

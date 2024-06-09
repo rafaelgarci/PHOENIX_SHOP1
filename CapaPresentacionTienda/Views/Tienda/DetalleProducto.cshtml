@@ -15,7 +15,7 @@
                 <h1 class="display-5 fw-bolder">@Html.DisplayTextFor(m => m.Nombre)</h1>
                 <div class="fs-5 mb-5">
                     @*<span class="text-decoration-line-through">$45.00</span>*@
-                    <span>@Html.DisplayTextFor(m => m.Precio) USD</span>
+                    <span>@Html.DisplayTextFor(m => m.Precio) COP</span>
                 </div>
                 <p class="lead">@Html.DisplayTextFor(m => m.Descripcion)</p>
                 <div class="d-flex">
@@ -39,3 +39,62 @@
         </div>
     </div>
 </section>
+
+
+@section scripts{
+    
+    <script>
+        $(document).on("click", "button.agregarcarrito", function () {
+
+    console.log($(this).data("idproducto"))
+
+    jQuery.ajax({
+        url: '@Url.Action("AgregarCarrito", "Tienda")',
+        type: "POST",
+        data: JSON.stringify({ idproducto: $(this).data("idproducto") }),
+        dataType: "json",
+        contentType: "application/json;charset=utf-8",
+        success: function (data) {
+
+            if (data.respuesta) {
+
+                MostrarCantidadCarrito();
+
+               @* swal({
+                    title: "Agregado al carrito ",
+                    text: "¿Desea ir al carrito?",
+                    type: "success",
+                    showCancelButton: true,
+                    confirmButtonClass: "btn-primary",
+                    confirmButtonText: "Si",
+                    cancelButtonText: "No",
+                    closeOnConfirm: true
+
+                }, function () {
+                    window.location.href = '@Url.Action("Carrito","Tienda")'
+                })
+                *@
+
+                swal("", "agregado al carrito ", "success");
+             } else {
+                swal("", data.mensaje, "warning");
+            }
+
+        }
+
+
+
+    });
+})
+
+
+
+
+
+    </script>
+    
+    
+    
+    
+    
+    }
